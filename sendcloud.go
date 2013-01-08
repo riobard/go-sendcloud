@@ -1,9 +1,9 @@
 package sendcloud
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -59,7 +59,7 @@ type response struct {
 	Ids     []string `json:"email_id_list"`
 }
 
-func (sc Sendcloud) send(email *Email) (id string, err error) {
+func (sc Sendcloud) Send(email *Email) (id string, err error) {
 	d := url.Values{}
 	d.Add("from", email.From)
 	if email.FromName != "" {
@@ -80,10 +80,22 @@ func (sc Sendcloud) send(email *Email) (id string, err error) {
 	d.Add("subject", email.Subject)
 	d.Add("html", email.Html)
 
-	reply, err := sc.do("mail.send", d)
-	if err != nil {
-		panic(err)
+	var reply struct {
+		Msg string   `json:"message"`
+		Ids []string `json:"email_id_list"`
 	}
-	log.Printf("%s", reply)
+
+	body, err := sc.do("mail.send", d)
+	if err != nil {
+		return
+	}
+	json.Unmarshal(body, &reply)
+	if reply.Msg != "success" {
+		err = fmt.Errorf("SendCloud error: %s", reply.Msg)
+		return
+	}
+	if len(reply.Ids) > 0 {
+		id = reply.Ids[0]
+	}
 	return
 }

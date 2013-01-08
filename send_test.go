@@ -23,5 +23,9 @@ func TestSend(t *testing.T) {
 		Subject: "SendCloud test mail",
 		Html:    "SendCloud test mail body",
 	}
-	sc.send(email)
+	mailId, err := sc.Send(email)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("mail-id = %s", mailId)
 }
