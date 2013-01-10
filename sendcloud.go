@@ -53,12 +53,6 @@ type Email struct {
 	Html     string
 }
 
-type response struct {
-	Message string   `json:"message"`
-	Errors  []string `json:"errors"`
-	Ids     []string `json:"email_id_list"`
-}
-
 func (sc Sendcloud) Send(email *Email) (id string, err error) {
 	d := url.Values{}
 	d.Add("from", email.From)
@@ -81,8 +75,9 @@ func (sc Sendcloud) Send(email *Email) (id string, err error) {
 	d.Add("html", email.Html)
 
 	var reply struct {
-		Msg string   `json:"message"`
-		Ids []string `json:"email_id_list"`
+		Msg  string   `json:"message"`
+		Errs []string `json:"errors"`
+		Ids  []string `json:"email_id_list"`
 	}
 
 	body, err := sc.do("mail.send", d)
@@ -91,7 +86,11 @@ func (sc Sendcloud) Send(email *Email) (id string, err error) {
 	}
 	json.Unmarshal(body, &reply)
 	if reply.Msg != "success" {
-		err = fmt.Errorf("SendCloud error: %s", reply.Msg)
+		if len(reply.Errs) > 0 {
+			err = fmt.Errorf("SendCloud error: %s", reply.Errs[0])
+		} else {
+			err = fmt.Errorf("SendCloud error: unknown")
+		}
 		return
 	}
 	if len(reply.Ids) > 0 {
