@@ -22,11 +22,10 @@ func New(user, pswd string) *Sendcloud {
 	return &Sendcloud{user, pswd}
 }
 
-func (sc Sendcloud) do(target string, data url.Values) (body []byte, err error) {
+func (sc *Sendcloud) do(target string, data url.Values) (body []byte, err error) {
 	url := fmt.Sprintf("%s%s.json", API_ENDPOINT, target)
 	data.Add("api_user", sc.user)
 	data.Add("api_key", sc.pswd)
-	data.Add("resp_email_id", "true")
 	rsp, err := http.PostForm(url, data)
 	if err != nil {
 		return
@@ -42,55 +41,51 @@ func (sc Sendcloud) do(target string, data url.Values) (body []byte, err error) 
 	return
 }
 
-type Email struct {
-	From     string
-	FromName string
-	To       []string
-	Cc       []string
-	Bcc      []string
-	ReplyTo  string
-	Subject  string
-	Html     string
+type Mail interface {
+	From() string
+	To() []string
+	Cc() []string
+	Bcc() []string
+	ReplyTo() string
+	Subject() string
+	Html() string
 }
 
-func (sc Sendcloud) Send(email *Email) (id string, err error) {
+func (sc *Sendcloud) Send(m Mail) (id string, err error) {
 	d := url.Values{}
-	d.Add("from", email.From)
-	if email.FromName != "" {
-		d.Add("fromname", email.FromName)
+	d.Add("resp_email_id", "true")
+	d.Add("from", m.From())
+	if to := m.To(); len(to) > 0 {
+		d.Add("to", strings.Join(to, ";"))
 	}
-	if len(email.To) > 0 {
-		d.Add("to", strings.Join(email.To, ";"))
+	if cc := m.Cc(); len(cc) > 0 {
+		d.Add("cc", strings.Join(cc, ";"))
 	}
-	if len(email.Cc) > 0 {
-		d.Add("cc", strings.Join(email.Cc, ";"))
+	if bcc := m.Bcc(); len(bcc) > 0 {
+		d.Add("bcc", strings.Join(bcc, ";"))
 	}
-	if len(email.Bcc) > 0 {
-		d.Add("bcc", strings.Join(email.Bcc, ";"))
+	if replyto := m.ReplyTo(); replyto != "" {
+		d.Add("replyto", replyto)
 	}
-	if email.ReplyTo != "" {
-		d.Add("replyto", email.ReplyTo)
+	d.Add("subject", m.Subject())
+	d.Add("html", m.Html())
+
+	body, err := sc.do("mail.send", d)
+	if err != nil {
+		return
 	}
-	d.Add("subject", email.Subject)
-	d.Add("html", email.Html)
 
 	var reply struct {
 		Msg  string   `json:"message"`
 		Errs []string `json:"errors"`
 		Ids  []string `json:"email_id_list"`
 	}
-
-	body, err := sc.do("mail.send", d)
-	if err != nil {
-		return
-	}
 	json.Unmarshal(body, &reply)
 	if reply.Msg != "success" {
 		if len(reply.Errs) > 0 {
 			err = fmt.Errorf("SendCloud error: %s", reply.Errs[0])
-		} else {
-			err = fmt.Errorf("SendCloud error: unknown")
 		}
+		err = fmt.Errorf("SendCloud error: unknown")
 		return
 	}
 	if len(reply.Ids) > 0 {

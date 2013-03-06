@@ -5,23 +5,40 @@ import (
 	"testing"
 )
 
-var user = flag.String("user", "", "Sendcloud user")
-var key = flag.String("key", "", "Sendcloud key")
-var from = flag.String("from", "", "From address")
-var to = flag.String("to", "", "To address")
-var sc *Sendcloud
+type mail struct {
+	from    string
+	to      []string
+	subject string
+	html    string
+}
+
+func (m *mail) From() string    { return m.from }
+func (m *mail) To() []string    { return m.to }
+func (m *mail) Cc() []string    { return nil }
+func (m *mail) Bcc() []string   { return nil }
+func (m *mail) ReplyTo() string { return "" }
+func (m *mail) Subject() string { return m.subject }
+func (m *mail) Html() string    { return m.html }
+
+var (
+	user = flag.String("username", "", "Sendcloud username")
+	pswd = flag.String("password", "", "Sendcloud password")
+	from = flag.String("from", "", "From address")
+	to   = flag.String("to", "", "To address")
+	sc   *Sendcloud
+)
 
 func init() {
 	flag.Parse()
-	sc = New(*user, *key)
+	sc = New(*user, *pswd)
 }
 
 func TestSend(t *testing.T) {
-	email := &Email{
-		From:    *from,
-		To:      []string{*to},
-		Subject: "SendCloud test mail",
-		Html:    "SendCloud test mail body",
+	email := &mail{
+		from:    *from,
+		to:      []string{*to},
+		subject: "SendCloud test mail",
+		html:    "SendCloud test mail body",
 	}
 	mailId, err := sc.Send(email)
 	if err != nil {
