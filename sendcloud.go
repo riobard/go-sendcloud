@@ -19,7 +19,7 @@ type Sendcloud struct {
 }
 
 func New(user, pswd string) *Sendcloud {
-	return &Sendcloud{user, pswd}
+	return &Sendcloud{user: user, pswd: pswd}
 }
 
 func (sc *Sendcloud) do(target string, data url.Values) (body []byte, err error) {
