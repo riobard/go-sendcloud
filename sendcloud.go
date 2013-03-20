@@ -84,8 +84,9 @@ func (sc *Sendcloud) Send(m Mail) (id string, err error) {
 	if reply.Msg != "success" {
 		if len(reply.Errs) > 0 {
 			err = fmt.Errorf("SendCloud error: %s", reply.Errs[0])
+		} else {
+			err = fmt.Errorf("SendCloud error: unknown")
 		}
-		err = fmt.Errorf("SendCloud error: unknown")
 		return
 	}
 	if len(reply.Ids) > 0 {
