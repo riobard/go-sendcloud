@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// fake email
 type mail struct {
 	from    string
 	to      []string
@@ -12,13 +13,14 @@ type mail struct {
 	html    string
 }
 
-func (m *mail) From() string    { return m.from }
-func (m *mail) To() []string    { return m.to }
-func (m *mail) Cc() []string    { return nil }
-func (m *mail) Bcc() []string   { return nil }
-func (m *mail) ReplyTo() string { return "" }
-func (m *mail) Subject() string { return m.subject }
-func (m *mail) Html() string    { return m.html }
+func (m *mail) From() string               { return m.from }
+func (m *mail) To() []string               { return m.to }
+func (m *mail) Cc() []string               { return nil }
+func (m *mail) Bcc() []string              { return nil }
+func (m *mail) ReplyTo() string            { return "" }
+func (m *mail) Subject() string            { return m.subject }
+func (m *mail) Html() string               { return m.html }
+func (m *mail) Headers() map[string]string { return nil }
 
 var (
 	user = flag.String("username", "", "Sendcloud username")

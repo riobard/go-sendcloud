@@ -49,6 +49,7 @@ type Mail interface {
 	ReplyTo() string
 	Subject() string
 	Html() string
+	Headers() map[string]string
 }
 
 func (sc *Sendcloud) Send(m Mail) (id string, err error) {
@@ -69,6 +70,15 @@ func (sc *Sendcloud) Send(m Mail) (id string, err error) {
 	}
 	d.Add("subject", m.Subject())
 	d.Add("html", m.Html())
+
+	headers := m.Headers()
+	if headers != nil {
+		hb, err := json.Marshal(headers)
+		if err != nil {
+			return "", err
+		}
+		d.Add("headers", string(hb))
+	}
 
 	body, err := sc.do("mail.send", d)
 	if err != nil {
