@@ -73,7 +73,7 @@ func (wh *Webhook) Handle(w http.ResponseWriter, req *http.Request) (evt *Event,
 		name:   req.Form.Get("event"),
 		rcpt:   req.Form.Get("recipient"),
 		msgid:  req.Form.Get("emailId"),
-		reason: req.Form.Get("reason"),
+		reason: req.Form.Get("message") + ": " + req.Form.Get("reason"),
 	}
 	return
 }
