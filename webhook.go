@@ -3,6 +3,7 @@ package sendcloud
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/subtle"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -81,5 +82,13 @@ func (wh *Webhook) Verify(timestamp, token, signature string) bool {
 	h := hmac.New(sha256.New, []byte(wh.key))
 	io.WriteString(h, timestamp)
 	io.WriteString(h, token)
-	return signature == hex.EncodeToString(h.Sum(nil))
+	calcSig := h.Sum(nil)
+	sig, err := hex.DecodeString(signature)
+	if err != nil {
+		return false
+	}
+	if len(sig) != len(calcSig) {
+		return false
+	}
+	return subtle.ConstantTimeCompare(sig, calcSig) == 1
 }
