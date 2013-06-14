@@ -23,16 +23,18 @@ func (m *mail) Html() string               { return m.html }
 func (m *mail) Headers() map[string]string { return nil }
 
 var (
-	user = flag.String("username", "", "Sendcloud username")
-	pswd = flag.String("password", "", "Sendcloud password")
-	from = flag.String("from", "", "From address")
-	to   = flag.String("to", "", "To address")
-	sc   *Sendcloud
+	domain = flag.String("domain", "", "Sendcloud domain")
+	user   = flag.String("username", "", "Sendcloud username")
+	pswd   = flag.String("password", "", "Sendcloud password")
+	from   = flag.String("from", "", "From address")
+	to     = flag.String("to", "", "To address")
+	sc     *Sendcloud
 )
 
 func init() {
 	flag.Parse()
-	sc = New(*user, *pswd)
+	sc = New()
+	sc.AddDomain(*domain, *user, *pswd)
 }
 
 func TestSend(t *testing.T) {
