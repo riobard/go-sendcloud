@@ -28,13 +28,13 @@ var (
 	pswd   = flag.String("password", "", "Sendcloud password")
 	from   = flag.String("from", "", "From address")
 	to     = flag.String("to", "", "To address")
-	sc     *Sendcloud
+	c      *Client
 )
 
 func init() {
 	flag.Parse()
-	sc = New()
-	sc.AddDomain(*domain, *user, *pswd)
+	c = New()
+	c.AddDomain(*domain, *user, *pswd)
 }
 
 func TestSend(t *testing.T) {
@@ -44,7 +44,7 @@ func TestSend(t *testing.T) {
 		subject: "SendCloud test mail",
 		html:    "SendCloud test mail body",
 	}
-	mailId, err := sc.Send(email)
+	mailId, err := c.Send(email)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,0 +1,3 @@
+# go-sendcloud
+
+Sendcloud client in Go. API doc http://godoc.org/github.com/riobard/go-sendcloud

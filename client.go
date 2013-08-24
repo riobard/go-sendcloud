@@ -11,33 +11,33 @@ const (
 	API_ENDPOINT = "https://sendcloud.sohu.com/webapi/"
 )
 
-type Sendcloud struct {
+type Client struct {
 	domains map[string]struct { // sending domains
 		api_user string
 		api_key  string
 	}
 }
 
-func New() *Sendcloud {
+func New() *Client {
 	d := make(map[string]struct {
 		api_user string
 		api_key  string
 	})
-	return &Sendcloud{domains: d}
+	return &Client{domains: d}
 }
 
 // add a sending domain with its authentication info
-func (sc *Sendcloud) AddDomain(domain, api_user, api_key string) {
-	sc.domains[domain] = struct {
+func (c *Client) AddDomain(domain, api_user, api_key string) {
+	c.domains[domain] = struct {
 		api_user string
 		api_key  string
 	}{api_user, api_key}
 }
 
 // invoke the remote API
-func (sc *Sendcloud) do(target, domain string, data url.Values) (body []byte, err error) {
+func (c *Client) do(target, domain string, data url.Values) (body []byte, err error) {
 	url := fmt.Sprintf("%s%s.json", API_ENDPOINT, target)
-	s, ok := sc.domains[domain]
+	s, ok := c.domains[domain]
 	if !ok {
 		return nil, fmt.Errorf("unknown domain: %s", domain)
 	}

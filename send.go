@@ -21,7 +21,7 @@ type Mail interface {
 
 var EMAIL_DOMAIN_RE = regexp.MustCompile(`[^<>]+<?.+@([^<>]+)>?`)
 
-func (sc *Sendcloud) Send(m Mail) (id string, err error) {
+func (c *Client) Send(m Mail) (id string, err error) {
 	// extract the sending domain
 	match := EMAIL_DOMAIN_RE.FindStringSubmatch(m.From())
 	if len(match) != 2 {
@@ -57,7 +57,7 @@ func (sc *Sendcloud) Send(m Mail) (id string, err error) {
 		d.Add("headers", string(hb))
 	}
 
-	body, err := sc.do("mail.send", domain, d)
+	body, err := c.do("mail.send", domain, d)
 	if err != nil {
 		return
 	}
