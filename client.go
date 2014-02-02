@@ -1,3 +1,6 @@
+/*
+Sendcloud client in Go.
+*/
 package sendcloud
 
 import (
