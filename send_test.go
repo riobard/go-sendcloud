@@ -23,12 +23,13 @@ func (m *mail) Html() string               { return m.html }
 func (m *mail) Headers() map[string]string { return nil }
 
 var (
-	domain = flag.String("domain", "", "Sendcloud domain")
-	user   = flag.String("username", "", "Sendcloud username")
-	pswd   = flag.String("password", "", "Sendcloud password")
-	from   = flag.String("from", "", "From address")
-	to     = flag.String("to", "", "To address")
-	c      *Client
+	domain   = flag.String("domain", "", "Sendcloud domain")
+	user     = flag.String("username", "", "Sendcloud username")
+	pswd     = flag.String("password", "", "Sendcloud password")
+	from     = flag.String("from", "", "From address")
+	to       = flag.String("to", "", "To address")
+	template = flag.String("template", "", "Template name")
+	c        *Client
 )
 
 func init() {
@@ -49,4 +50,20 @@ func TestSend(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("mail-id = %s", mailId)
+}
+
+func TestSendTemplate(t *testing.T) {
+	substitutionVars := NewSubstitution()
+	substitutionVars.AddTo("smartynaoki@gmail.com")
+	substitutionVars.AddTo("jiang.le@126.com")
+	substitutionVars.AddSub("%name%", "naoki")
+	substitutionVars.AddSub("%name%", "JiangLe")
+	substitutionVars.AddSub("%url%", "http://www.google.com/1")
+	substitutionVars.AddSub("%url%", "http://www.google.com/2")
+	substitutionVars.AddSub("%appname%", "GoTalk")
+	substitutionVars.AddSub("%appname%", "GoTalk")
+	err := c.SendTemplate(*template, "GoTalk欢迎你", *from, "TestSender", substitutionVars)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
